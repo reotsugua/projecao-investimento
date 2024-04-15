@@ -56,30 +56,40 @@ async function fetchCDIRateFromIpeaData() {
 
 async function fetchIPCARateFromIpeaData() {
     const today = new Date();
-    const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1); // Pegando o primeiro dia do mês anterior
-    const lastMonthString = `${lastMonthDate.getFullYear()}-${(lastMonthDate.getMonth() + 1).toString().padStart(2, '0')}-01`; // Formatando a data para YYYY-MM-DD
+    const lastYearDate = new Date(today.getFullYear() - 1, today.getMonth(), 1);
 
-    const url = `http://ipeadata.gov.br/api/odata4/ValoresSerie(SERCODIGO='PRECOS12_IPCAG12')?$filter=VALDATA eq ${lastMonthString}`;
+    const lastYearString = `${lastYearDate.getFullYear()}-${(lastYearDate.getMonth() + 1).toString().padStart(2, '0')}-01`;
+    const currentMonthString = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-01`;
+
+    const url = `http://ipeadata.gov.br/api/odata4/ValoresSerie(SERCODIGO='PRECOS12_IPCAG12')?$filter=VALDATA ge ${lastYearString} and VALDATA lt ${currentMonthString}`;
     try {
         const response = await fetch(url);
         const data = await response.json();
 
         if (data.value && data.value.length > 0) {
-            let correctData = data.value.find(item => item.VALDATA.startsWith(lastMonthString));
-            if (correctData) {
-                const annualRate = correctData.VALVALOR; // IPCA já é fornecido como uma taxa anual
-                document.getElementById('ipcaRate').textContent = `IPCA do mês anterior: ${annualRate.toFixed(2)}% a.a.`;
+            // Assegura que apenas os últimos 12 valores sejam considerados para a soma
+            const last12MonthsData = data.value.slice(-12);
+            const cumulativeRate = last12MonthsData.reduce((acc, curr) => acc + curr.VALVALOR, 0);
+
+            // Encontra a taxa do último mês disponível especificamente
+            const lastMonthData = last12MonthsData[last12MonthsData.length - 1];
+            if (lastMonthData) {
+                const lastMonthRate = lastMonthData.VALVALOR;
+                document.getElementById('ipcaRate').textContent = `IPCA do último mês disponível: ${lastMonthRate.toFixed(2)}% a.a., Acumulado últimos 12 meses: ${cumulativeRate.toFixed(2)}%`;
             } else {
-                document.getElementById('ipcaRate').textContent = 'IPCA do mês anterior: Dados específicos não encontrados';
+                document.getElementById('ipcaRate').textContent = 'IPCA do último mês disponível: Dados específicos não encontrados';
             }
         } else {
-            document.getElementById('ipcaRate').textContent = 'IPCA do mês anterior: Dados não disponíveis';
+            document.getElementById('ipcaRate').textContent = 'IPCA do último mês disponível: Dados não disponíveis';
         }
     } catch (error) {
         console.error('Erro ao buscar taxa IPCA:', error);
-        document.getElementById('ipcaRate').textContent = 'IPCA do mês anterior: Erro ao carregar dados';
+        document.getElementById('ipcaRate').textContent = 'IPCA do último mês disponível: Erro ao carregar dados';
     }
 }
+
+
+
 
 
 
