@@ -13,7 +13,8 @@ async function fetchSelicRateFromIpeaData() {
             if (correctData) {
                 const monthlyRate = correctData.VALVALOR / 100; // Convertendo porcentagem para decimal
                 const annualRate = (Math.pow(1 + monthlyRate, 12) - 1) * 100; // Convertendo taxa mensal para anual
-                document.getElementById('selicRate').textContent = `Taxa Selic de ${lastMonthString.slice(0, 7)} convertida para anual: ${annualRate.toFixed(2)}% a.a.`;
+                // document.getElementById('selicRate').textContent = `Taxa Selic de ${lastMonthString.slice(0, 7)} convertida para anual: ${annualRate.toFixed(2)}% a.a.`;
+                document.getElementById('selicRate').textContent = `Taxa Selic: ${annualRate.toFixed(2)}% a.a.`;
             } else {
                 document.getElementById('selicRate').textContent = 'Taxa Selic do mês anterior: Dados específicos não encontrados';
             }
@@ -41,7 +42,8 @@ async function fetchCDIRateFromIpeaData() {
             if (correctData) {
                 const monthlyRate = correctData.VALVALOR / 100; // Convertendo porcentagem para decimal
                 const annualRate = (Math.pow(1 + monthlyRate, 12) - 1) * 100; // Convertendo taxa mensal para anual
-                document.getElementById('cdiRate').textContent = `CDI do mês anterior convertido para anual: ${annualRate.toFixed(2)}% a.a.`;
+                // document.getElementById('cdiRate').textContent = `CDI do mês anterior convertido para anual: ${annualRate.toFixed(2)}% a.a.`;
+                document.getElementById('cdiRate').textContent = `CDI: ${annualRate.toFixed(2)}% a.a.`;
             } else {
                 document.getElementById('cdiRate').textContent = 'CDI do mês anterior: Dados específicos não encontrados';
             }
